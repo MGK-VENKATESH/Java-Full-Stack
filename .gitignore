@@ -1,0 +1,27 @@
+# Java / Spring Boot
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+**/logs/
+
+# Node.js / React
+**/node_modules/
+**/dist/
+
+# Environment variables and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# IDE and operating system files
+**/.DS_Store
+**/.idea/
+**/.vscode/
+
+
+# Log files
+*.log
+logs/
+
+# Unused Node.js files in Spring Boot backend
+/ecommerce-backend/package.json
+/ecommerce-backend/package-lock.json
