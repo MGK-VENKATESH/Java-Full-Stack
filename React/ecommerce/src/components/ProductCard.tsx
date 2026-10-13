@@ -3,6 +3,7 @@ import type { Product } from "../types/product";
 import { useCartStore } from "../store/cartStore";
 import { deleteProduct, updateProduct } from "../api/productApi";
 
+
 interface ProductCardProps {
   product: Product;
   isAdmin?: boolean;
@@ -48,23 +49,24 @@ function ProductCard({
 
   const [message, setMessage] = useState("");
 
+  
+  
   const handleDelete = async () => {
-    if (
-      !window.confirm(
-        `Delete ${product.productName}?`
-      )
-    ) {
+    if (!window.confirm(`Delete ${product.productName}?`)) {
       return;
     }
 
     try {
       await deleteProduct(product.productId);
-
+      alert("Product deleted successfully");
       window.location.reload();
-    } catch {
-      alert("Product deletion failed");
+    } catch (error) {
+      console.error("Product deletion error:", error);
+      alert("Product deletion failed. Check the browser console for details.");
     }
   };
+
+
 
   const handleUpdate = async (
     event: React.FormEvent
