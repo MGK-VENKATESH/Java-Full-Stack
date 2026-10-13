@@ -28,60 +28,61 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+    
+        @Override
+        protected void doFilterInternal(
+                HttpServletRequest request,
+                HttpServletResponse response,
+                FilterChain filterChain)
+                throws ServletException, IOException {
 
-        String authorizationHeader =
-                request.getHeader("Authorization");
+        // Public product browsing does not require a JWT.
+        if ("GET".equalsIgnoreCase(request.getMethod())
+                && request.getServletPath().startsWith("/api/products")) {
+                filterChain.doFilter(request, response);
+                return;
+        }
 
-        if (authorizationHeader == null ||
-                !authorizationHeader.startsWith("Bearer ")) {
+        String authorizationHeader = request.getHeader("Authorization");
 
-            filterChain.doFilter(request, response);
-            return;
+        if (authorizationHeader == null
+                || !authorizationHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
         }
 
         String token = authorizationHeader.substring(7);
 
-        String email;
-
         try {
-            email = jwtService.extractEmail(token);
+                String email = jwtService.extractEmail(token);
+
+                if (email != null
+                        && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(email);
+
+                if (jwtService.isTokenValid(token)) {
+                        UsernamePasswordAuthenticationToken authenticationToken =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails,
+                                        null,
+                                        userDetails.getAuthorities());
+
+                        authenticationToken.setDetails(
+                                new WebAuthenticationDetailsSource()
+                                        .buildDetails(request));
+
+                        SecurityContextHolder.getContext()
+                                .setAuthentication(authenticationToken);
+                }
+                }
         } catch (Exception exception) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        if (email != null &&
-                SecurityContextHolder.getContext()
-                        .getAuthentication() == null) {
-
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(email);
-
-            if (jwtService.isTokenValid(token)) {
-
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request)
-                );
-
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authenticationToken);
-            }
+                // Invalid tokens are not authenticated.
+                SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
-    }
+        }
+
 }
