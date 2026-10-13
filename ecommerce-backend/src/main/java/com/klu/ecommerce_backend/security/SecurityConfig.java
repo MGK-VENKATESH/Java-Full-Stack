@@ -94,7 +94,7 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173", "https://YOUR-VERCEL-DOMAIN.vercel.app")
+                List.of("http://localhost:5173", "https://java-full-stack-two.vercel.app")
         );
 
         configuration.setAllowedMethods(
