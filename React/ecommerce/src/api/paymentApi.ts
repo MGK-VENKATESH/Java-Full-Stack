@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/payment";
-const ORDER_API_URL = "http://localhost:8080/api/orders";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/payment`;
+const ORDER_API_URL = `${import.meta.env.VITE_API_URL}/api/orders`;
 
 const getAuthHeaders = () => ({
   headers: {
@@ -9,10 +9,12 @@ const getAuthHeaders = () => ({
   },
 });
 
-export const createOrder = async (items: {
-  productId: number;
-  quantity: number;
-}[]) => {
+export const createOrder = async (
+  items: {
+    productId: number;
+    quantity: number;
+  }[]
+) => {
   const response = await axios.post(
     ORDER_API_URL,
     { items },
