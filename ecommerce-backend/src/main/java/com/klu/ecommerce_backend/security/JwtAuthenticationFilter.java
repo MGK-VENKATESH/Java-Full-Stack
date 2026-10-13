@@ -6,7 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +28,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    @Override
+protected boolean shouldNotFilter(HttpServletRequest request) {
+    return HttpMethod.GET.matches(request.getMethod())
+            && request.getServletPath().matches("/api/products/?");
+}
     
         @Override
         protected void doFilterInternal(
@@ -37,11 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 throws ServletException, IOException {
 
         // Public product browsing does not require a JWT.
-        if ("GET".equalsIgnoreCase(request.getMethod())
-                && request.getServletPath().startsWith("/api/products")) {
-                filterChain.doFilter(request, response);
-                return;
-        }
+        
 
         String authorizationHeader = request.getHeader("Authorization");
 
